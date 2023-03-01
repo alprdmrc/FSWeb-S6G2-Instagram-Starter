@@ -20,6 +20,7 @@ const App = () => {
   // Artık sahteVeri'ye ihtiyacınız olmayacak.
   // Arama çubuğunun çalışması için , arama kriterini tutacak başka bir state'e ihtiyacımız olacak.
   const [gonderiler, setGonderiler] = useState(sahteVeri);
+  const [alreadyLikedItems, setAlreadyLikedItems] = useState([]);
 
   const gonderiyiBegen = (gonderiID) => {
     /*
@@ -34,16 +35,47 @@ const App = () => {
         - aksi takdirde, sadece gönderi nesnesini değiştirmeden döndürün.
      */
 
+    alreadyLikedItems.includes(gonderiID)
+      ? setAlreadyLikedItems((e) => e.filter((id) => id !== gonderiID))
+      : setAlreadyLikedItems((e) => [...e, gonderiID]);
+
     setGonderiler(
-      gonderiler.map((e) => {
-        if(e.id === gonderiID) {
+      gonderiler.map((gonderi) => {
+        if (
+          gonderi.id === gonderiID &&
+          !alreadyLikedItems.includes(gonderiID)
+        ) {
           return {
-            ...e,
-            likes:e.likes+1
-          }
+            ...gonderi,
+            likes: gonderi.likes + 1,
+          };
+        } else if (
+          gonderi.id === gonderiID &&
+          alreadyLikedItems.includes(gonderiID)
+        ) {
+          return {
+            ...gonderi,
+            likes: gonderi.likes - 1,
+          };
         } else {
-          return e
+          return gonderi;
         }
+      })
+    );
+  };
+
+  const yorumEkle = (gonderiID, yorum) => {
+    console.log(gonderiID);
+    setGonderiler(
+      gonderiler.map((gonderi) => {
+        if (gonderi.id === gonderiID) {
+          gonderi.comments.push({
+            id: 99,
+            username: "alper",
+            text: yorum,
+          });
+        }
+        return gonderi;
       })
     );
   };
@@ -52,7 +84,11 @@ const App = () => {
     <div className="App">
       {/* AramaÇubuğu ve Gönderiler'i render etmesi için buraya ekleyin */}
       <AramaÇubuğu />
-      <Gönderiler gonderiler={gonderiler} gonderiyiBegen={gonderiyiBegen}/>
+      <Gönderiler
+        gonderiler={gonderiler}
+        gonderiyiBegen={gonderiyiBegen}
+        yorumEkle={yorumEkle}
+      />
 
       {/* Her bileşenin hangi proplara ihtiyaç duyduğunu kontrol edin, eğer ihtiyaç varsa ekleyin! */}
     </div>
